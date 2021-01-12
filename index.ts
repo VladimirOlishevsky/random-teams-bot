@@ -21,38 +21,20 @@ const inlineMessageRatingKeyboard = Markup.inlineKeyboard([ // add like or disli
 
 let players = [];
 
-// bot.hears(/start/i, (ctx) => {
-//     ctx.reply('❓⚽🏃🏻‍♂️ 🏃🏻‍♂️ How many players are you have?',
-//         Markup.inlineKeyboard([
-//             [Markup.callbackButton('8', 'eight'),
-//             Markup.callbackButton('9', 'nine'),
-//             Markup.callbackButton('10', 'ten'),
-//             Markup.callbackButton('11', 'eleven'),
-//             Markup.callbackButton('12', 'twelve'),
-//             ],
-//             [Markup.callbackButton('13! Incredible', 'thirteen')],
-//             [Markup.callbackButton('14!! Oh my God!', 'fourteen')],
-//         ]).extra()
-//     )
-// });
 const startAndHelp = (ctx) => {
     ctx.reply('Hi ' + ctx.update.message.from.first_name + '! \n\n' +
         'Этот бот умеет делить на 2 команды введенных игроков \n');
     
     ctx.reply(
-        //ctx.from.id,
         '❓ Хочешь собрать команду?',
         Markup.inlineKeyboard([
-            [Markup.callbackButton('Да', 'yes'), Markup.callbackButton('Нет', 'no')],
+            [Markup.callbackButton('Да', 'yes_add_team'), Markup.callbackButton('Нет', 'no_add_team')],
         ]).extra()
     )
 }
 
-bot.hears(/start/i, (ctx) => {
-    startAndHelp(ctx);
-})
-
-bot.hears(/help/i, (ctx) => {
+bot.command('start', (ctx) => startAndHelp(ctx))
+bot.command('help', (ctx) => {
     ctx.telegram.sendMessage(
         ctx.from.id,
         'Here are some commands you can try:\n\n' +
@@ -63,21 +45,12 @@ bot.hears(/help/i, (ctx) => {
     )
 })
 
+bot.action('yes_add_team', (ctx) => ctx.telegram.sendMessage(
+    ctx.from.id,
+    'Введи всех игрочишек через запятую ( , ) за один раз'
+))
 
-const addPlayers = (data) => {
-    players.push(data);
-    console.log(players)
-}
-
-
-// bot.action('/start', (ctx) => {
-//     bot.start((ctx) => {
-//         startAndHelp(ctx);
-//     })
-// })
-
-
-bot.action('no', (ctx) => ctx.telegram.sendMessage(
+bot.action('no_add_team', (ctx) => ctx.telegram.sendMessage(
     ctx.from.id,
     'Here are some commands you can try:\n\n' +
     '🤓 /help - helps command \n' +
@@ -86,13 +59,10 @@ bot.action('no', (ctx) => ctx.telegram.sendMessage(
     '😎 /hack - hack game and to know how to be the best\n'
 ))
 
-bot.action('yes', (ctx) => ctx.telegram.sendMessage(
-    ctx.from.id,
-    'Введи всех игрочишек через запятую (,) за один раз'
-))
-
-
 bot.on('text', (ctx) => {   
+    players.push(ctx.update.message.text.split(','));
+    players = players.reduce((a, b) => a.concat(b), []);
+     console.log(players)
         ctx.telegram.sendMessage(
             ctx.from.id,
             '❓ Все игроки внесены?',
@@ -105,11 +75,14 @@ bot.on('text', (ctx) => {
         )
 })
 
+bot.action('all_players', (ctx) => {
+    players.sort(() => Math.random() - 0.5)
+    console.log(players)
+})
 
-
-// bot.action('all_players', (ctx) => {
-//     console.log(ctx.answerInlineQuery)
-// })
+bot.action('not_all_players', (ctx) => {
+    
+})
 
 
 
@@ -125,7 +98,20 @@ bot.on('callback_query', (ctx) => {
 })
 
 
-
+// bot.hears(/start/i, (ctx) => {
+//     ctx.reply('❓⚽🏃🏻‍♂️ 🏃🏻‍♂️ How many players are you have?',
+//         Markup.inlineKeyboard([
+//             [Markup.callbackButton('8', 'eight'),
+//             Markup.callbackButton('9', 'nine'),
+//             Markup.callbackButton('10', 'ten'),
+//             Markup.callbackButton('11', 'eleven'),
+//             Markup.callbackButton('12', 'twelve'),
+//             ],
+//             [Markup.callbackButton('13! Incredible', 'thirteen')],
+//             [Markup.callbackButton('14!! Oh my God!', 'fourteen')],
+//         ]).extra()
+//     )
+// });
 
 // bot.hears(/batya/i, (ctx) => {
 //     ctx.replyWithPhoto({ source: './assets/hack-game.jpg' })
